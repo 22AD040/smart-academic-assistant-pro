@@ -1,7 +1,6 @@
 import sys
 import os
 
-
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, "app"))
@@ -15,18 +14,11 @@ BUILD_API = "https://smart-academic-assistant-pro.onrender.com/build"
 
 st.set_page_config(page_title="Smart AI Assistant", layout="wide")
 
-
 st.markdown("""
 <style>
-body {
-    background-color: #0e1117;
-}
+body { background-color: #0e1117; }
+h1, h2, h3, h4 { color: white; }
 
-h1, h2, h3, h4 {
-    color: white;
-}
-
-/* INPUT */
 .stTextInput input {
     background-color: #1c1f26;
     color: white;
@@ -34,7 +26,6 @@ h1, h2, h3, h4 {
     padding: 10px;
 }
 
-/* BUTTON */
 .stButton button {
     background: linear-gradient(90deg, #00c6ff, #0072ff);
     color: white;
@@ -44,7 +35,6 @@ h1, h2, h3, h4 {
     font-weight: bold;
 }
 
-/* USER MESSAGE */
 .user-box {
     background: #2b313e;
     color: #ffffff;
@@ -53,7 +43,6 @@ h1, h2, h3, h4 {
     margin: 10px 0;
 }
 
-/* AI MESSAGE */
 .chat-box {
     background: #111827;
     color: #00ffcc;
@@ -66,7 +55,6 @@ h1, h2, h3, h4 {
 </style>
 """, unsafe_allow_html=True)
 
-
 if "user" not in st.session_state:
     st.session_state.user = None
 
@@ -77,7 +65,6 @@ if "messages" not in st.session_state:
 if not st.session_state.user:
 
     st.title("🎓 Smart Academic Assistant")
-
     tab1, tab2 = st.tabs(["Login", "Register"])
 
     with tab1:
@@ -116,7 +103,6 @@ else:
     st.sidebar.title("👤 User Panel")
     st.sidebar.write(f"Welcome, {st.session_state.user}")
 
-
     if st.sidebar.button("🆕 New Chat"):
         st.session_state.messages = []
         st.rerun()
@@ -127,30 +113,41 @@ else:
         st.rerun()
 
     st.sidebar.markdown("## 📄 Upload PDF")
-
     uploaded_file = st.sidebar.file_uploader("Upload PDF", type=["pdf"])
 
     if uploaded_file:
-        with open("temp.pdf", "wb") as f:
-            f.write(uploaded_file.read())
 
-        st.sidebar.success("✅ PDF Uploaded")
 
-        with st.spinner("Processing PDF..."):
-            try:
-                res = requests.post(
-                    BUILD_API,
-                    files={"file": (uploaded_file.name, uploaded_file.getvalue(), "application/pdf")},
-                    timeout=120
-                )
+        if uploaded_file.size > 5 * 1024 * 1024:
+            st.sidebar.warning("⚠️ Upload smaller PDF (<5MB)")
 
-                if res.status_code == 200:
-                    st.sidebar.success("✅ PDF processed successfully")
-                else:
-                    st.sidebar.error("❌ Failed to process PDF")
+        else:
+            st.sidebar.success("✅ PDF Uploaded")
 
-            except Exception as e:
-                st.sidebar.warning(f"⚠️ Backend error: {e}")
+
+            st.sidebar.info("⏳ Processing PDF... this may take 1-3 minutes")
+
+            with st.spinner("Processing PDF..."):
+                try:
+                    res = requests.post(
+                        BUILD_API,
+                        files={
+                            "file": (
+                                uploaded_file.name,
+                                uploaded_file.getvalue(),
+                                "application/pdf"
+                            )
+                        },
+                        timeout=300
+                    )
+
+                    if res.status_code == 200:
+                        st.sidebar.success("✅ PDF processed successfully")
+                    else:
+                        st.sidebar.error("❌ Failed to process PDF")
+
+                except Exception as e:
+                    st.sidebar.warning(f"⚠️ Backend error: {e}")
 
 
     st.sidebar.markdown("## 💬 Chat History")
@@ -163,8 +160,8 @@ else:
                 {"role": "assistant", "content": chat["a"]}
             ]
 
-    st.title("🤖 Smart Academic Assistant")
 
+    st.title("🤖 Smart Academic Assistant")
     query = st.text_input("Ask your question...")
     chat_container = st.container()
 
@@ -174,17 +171,20 @@ else:
 
             try:
                 res = requests.post(API, json={"question": query}, timeout=60)
-                answer = res.json().get("answer", "⚠️ No response")
+
+                if res.status_code == 200:
+                    answer = res.json().get("answer", "⚠️ No response")
+                else:
+                    answer = f"❌ API Error: {res.status_code}"
+
             except Exception as e:
                 answer = f"⚠️ {e}"
 
             st.session_state.messages.append({"role": "assistant", "content": answer})
             save_chat(st.session_state.user, query, answer)
 
-            # 🔥 FORCE SCROLL USING RERUN TRICK
             st.session_state.scroll = True
             st.rerun()
-
 
     with chat_container:
         for msg in st.session_state.messages:
@@ -192,7 +192,6 @@ else:
                 st.markdown(f"<div class='user-box'>🧑 {msg['content']}</div>", unsafe_allow_html=True)
             else:
                 st.markdown(f"<div class='chat-box'>🤖 {msg['content']}</div>", unsafe_allow_html=True)
-
 
     if st.session_state.get("scroll", False):
         st.markdown(
