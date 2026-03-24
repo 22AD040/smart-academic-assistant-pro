@@ -1,45 +1,46 @@
 from fastapi import APIRouter, UploadFile, File
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from app.services.llm_service import get_answer
 from app.core.retrieval import retrieve_docs
-from scripts.build_index import build_from_pdf
 import os
+import traceback
 
 router = APIRouter()
-
 
 
 class Query(BaseModel):
     question: str
 
 
-
+# ✅ ROOT (IMPORTANT for UptimeRobot)
 @router.get("/")
 def home():
-    return {"message": "API running"}
+    return {"status": "ok", "message": "Backend is running"}
 
 
+# ✅ ALSO SUPPORT HEAD (VERY IMPORTANT)
+@router.head("/")
+def head_home():
+    return {"status": "ok"}
 
+
+# ✅ ASK API
 @router.post("/ask")
 def ask(query: Query):
     question = query.question
 
-
     if os.path.exists("faiss_index/index.faiss"):
-
         docs = retrieve_docs(question)
 
         if docs:
             context = "\n".join(docs)
-
             answer = get_answer(question, context)
 
-            # 🔥 NEW FIX: CHECK IF NOT FOUND
             if "Not found in PDF" not in answer:
                 return {
                     "answer": "📄 Based on uploaded PDF:\n\n" + answer
                 }
-
 
     answer = get_answer(question)
 
@@ -48,30 +49,30 @@ def ask(query: Query):
     }
 
 
-
+# ✅ BUILD API (FIXED)
 @router.post("/build")
 async def build_index(file: UploadFile = File(...)):
     try:
+        contents = await file.read()
 
-        if os.path.exists("faiss_index/index.faiss"):
-            return {"message": "⚡ Index already exists (Skipping rebuild)"}
+        with open("temp.pdf", "wb") as f:
+            f.write(contents)
 
+        from app.core.vector_store import build_vector_store
 
-        file_path = f"temp_{file.filename}"
+        build_vector_store("temp.pdf")
 
-        with open(file_path, "wb") as f:
-            f.write(await file.read())
-
-
-        build_from_pdf(file_path)
-
-        return {"message": "✅ PDF indexed successfully"}
+        return {"status": "success"}
 
     except Exception as e:
-        return {"error": str(e)}
+        print(traceback.format_exc())
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
 
 
-
+# ✅ RESET
 @router.post("/reset")
 def reset_index():
     try:
