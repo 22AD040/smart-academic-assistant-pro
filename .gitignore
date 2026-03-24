@@ -33,3 +33,6 @@ Thumbs.db
 
 
 *.pdf
+
+temp_file/
+temp.pdf
