@@ -1,12 +1,15 @@
 from fastapi import FastAPI
+from app.api.routes import router
 
 app = FastAPI()
+
+# ✅ include all routes
+app.include_router(router)
 
 @app.get("/")
 def root():
     return {"status": "ok", "message": "Backend is running"}
 
-# 🔥 ADD THIS
 @app.head("/")
 def head_root():
     return {"status": "ok"}
