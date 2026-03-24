@@ -10,8 +10,8 @@ import streamlit as st
 import requests
 from auth.auth import login, register, save_chat, get_chat
 
-API = "http://127.0.0.1:8000/ask"
-BUILD_API = "http://127.0.0.1:8000/build"
+API = "https://smart-academic-assistant-pro.onrender.com/ask"
+BUILD_API = "https://smart-academic-assistant-pro.onrender.com/build"
 
 st.set_page_config(page_title="Smart AI Assistant", layout="wide")
 
@@ -140,7 +140,8 @@ else:
             try:
                 res = requests.post(
                     BUILD_API,
-                    files={"file": (uploaded_file.name, uploaded_file.getvalue(), "application/pdf")}
+                    files={"file": (uploaded_file.name, uploaded_file.getvalue(), "application/pdf")},
+                    timeout=120
                 )
 
                 if res.status_code == 200:
@@ -172,7 +173,7 @@ else:
             st.session_state.messages.append({"role": "user", "content": query})
 
             try:
-                res = requests.post(API, json={"question": query})
+                res = requests.post(API, json={"question": query}, timeout=60)
                 answer = res.json().get("answer", "⚠️ No response")
             except Exception as e:
                 answer = f"⚠️ {e}"
