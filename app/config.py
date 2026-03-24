@@ -1,6 +1,6 @@
-import streamlit as st
+import os
 
-GEMINI_API_KEY = st.secrets["gemini_api_key"]
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
