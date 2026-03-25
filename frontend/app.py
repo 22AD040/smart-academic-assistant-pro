@@ -62,9 +62,6 @@ if "user" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-if "query_input" not in st.session_state:
-    st.session_state.query_input = ""
-
 # 🔐 LOGIN PAGE
 if not st.session_state.user:
 
@@ -128,19 +125,16 @@ else:
 
     st.title("🤖 Smart Academic Assistant")
 
-    query = st.text_input("Ask your question...", key="query_input")
+    query = st.text_input("Ask your question...")
 
-    # 🚀 FIXED BUTTON LOGIC
     if st.button("Ask"):
-        if not st.session_state.query_input.strip():
+        if not query.strip():
             st.warning("⚠️ Please enter a question")
         else:
-            question = st.session_state.query_input
-
-            st.session_state.messages.append({"role": "user", "content": question})
+            st.session_state.messages.append({"role": "user", "content": query})
 
             try:
-                res = requests.post(API, json={"question": question}, timeout=60)
+                res = requests.post(API, json={"question": query}, timeout=60)
 
                 if res.status_code == 200:
                     answer = res.json().get("answer", "⚠️ No response")
@@ -151,10 +145,7 @@ else:
                 answer = f"⚠️ {e}"
 
             st.session_state.messages.append({"role": "assistant", "content": answer})
-            save_chat(st.session_state.user, question, answer)
-
-            # ✅ SAFE CLEAR (NO ERROR)
-            st.session_state.query_input = ""
+            save_chat(st.session_state.user, query, answer)
 
             st.rerun()
 
