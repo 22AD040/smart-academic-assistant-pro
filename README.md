@@ -127,7 +127,7 @@ smart-academic-assistant-pro/
 ![Login](assets/login.png)
 
 ### 🤖 Chat Interface
-![Chat](assets/chat.png)
+![Chat](assets/Chat_Interface.png)
 
 ---
 
