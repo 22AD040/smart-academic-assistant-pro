@@ -49,6 +49,8 @@ https://smart-academic-assistant-pro.onrender.com/docs
   "question": "What is Artificial Intelligence?"
 }
 
+```
+
 ---
 
 ## 🧠 Overview
@@ -284,3 +286,5 @@ If you like this project:
 ## 📜 License
 
 This project is licensed under the **MIT License**
+
+---
