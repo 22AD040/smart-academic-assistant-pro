@@ -10,7 +10,6 @@ import requests
 from auth.auth import login, register, save_chat, get_chat
 
 API = "https://smart-academic-assistant-pro.onrender.com/ask"
-BUILD_API = "https://smart-academic-assistant-pro.onrender.com/build"
 
 st.set_page_config(page_title="Smart AI Assistant", layout="wide")
 
@@ -55,6 +54,7 @@ h1, h2, h3, h4 { color: white; }
 </style>
 """, unsafe_allow_html=True)
 
+# SESSION STATE
 if "user" not in st.session_state:
     st.session_state.user = None
 
@@ -62,9 +62,11 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 
+# 🔐 LOGIN PAGE
 if not st.session_state.user:
 
     st.title("🎓 Smart Academic Assistant")
+
     tab1, tab2 = st.tabs(["Login", "Register"])
 
     with tab1:
@@ -98,6 +100,7 @@ if not st.session_state.user:
                         st.error("❌ Username exists")
 
 
+# 🤖 MAIN APP
 else:
 
     st.sidebar.title("👤 User Panel")
@@ -112,44 +115,7 @@ else:
         st.session_state.messages = []
         st.rerun()
 
-    st.sidebar.markdown("## 📄 Upload PDF")
-    uploaded_file = st.sidebar.file_uploader("Upload PDF", type=["pdf"])
-
-    if uploaded_file:
-
-
-        if uploaded_file.size > 5 * 1024 * 1024:
-            st.sidebar.warning("⚠️ Upload smaller PDF (<5MB)")
-
-        else:
-            st.sidebar.success("✅ PDF Uploaded")
-
-
-            st.sidebar.info("⏳ Processing PDF... this may take 1-3 minutes")
-
-            with st.spinner("Processing PDF..."):
-                try:
-                    res = requests.post(
-                        BUILD_API,
-                        files={
-                            "file": (
-                                uploaded_file.name,
-                                uploaded_file.getvalue(),
-                                "application/pdf"
-                            )
-                        },
-                        timeout=300
-                    )
-
-                    if res.status_code == 200:
-                        st.sidebar.success("✅ PDF processed successfully")
-                    else:
-                        st.sidebar.error("❌ Failed to process PDF")
-
-                except Exception as e:
-                    st.sidebar.warning(f"⚠️ Backend error: {e}")
-
-
+    # 💬 Chat History
     st.sidebar.markdown("## 💬 Chat History")
     history = get_chat(st.session_state.user)
 
@@ -160,13 +126,16 @@ else:
                 {"role": "assistant", "content": chat["a"]}
             ]
 
-
     st.title("🤖 Smart Academic Assistant")
-    query = st.text_input("Ask your question...")
+
+    query = st.text_input("Ask your question...", key="query_input")
     chat_container = st.container()
 
+    # ✅ FIX: safer button handling
     if st.button("Ask"):
-        if query.strip():
+        if not query.strip():
+            st.warning("⚠️ Please enter a question")
+        else:
             st.session_state.messages.append({"role": "user", "content": query})
 
             try:
@@ -182,6 +151,9 @@ else:
 
             st.session_state.messages.append({"role": "assistant", "content": answer})
             save_chat(st.session_state.user, query, answer)
+
+            # Clear input after ask
+            st.session_state.query_input = ""
 
             st.session_state.scroll = True
             st.rerun()
