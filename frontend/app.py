@@ -13,6 +13,7 @@ API = "https://smart-academic-assistant-pro.onrender.com/ask"
 
 st.set_page_config(page_title="Smart AI Assistant", layout="wide")
 
+# 🎨 UI Styling
 st.markdown("""
 <style>
 body { background-color: #0e1117; }
@@ -54,13 +55,15 @@ h1, h2, h3, h4 { color: white; }
 </style>
 """, unsafe_allow_html=True)
 
-# SESSION STATE
+# ✅ SESSION STATE INIT
 if "user" not in st.session_state:
     st.session_state.user = None
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+if "query_input" not in st.session_state:
+    st.session_state.query_input = ""
 
 # 🔐 LOGIN PAGE
 if not st.session_state.user:
@@ -77,13 +80,12 @@ if not st.session_state.user:
             if not username or not password:
                 st.warning("⚠️ Please enter credentials")
             else:
-                with st.spinner("Logging in..."):
-                    if login(username, password):
-                        st.session_state.user = username
-                        st.success("✅ Logged in")
-                        st.rerun()
-                    else:
-                        st.error("❌ Invalid credentials")
+                if login(username, password):
+                    st.session_state.user = username
+                    st.success("✅ Logged in")
+                    st.rerun()
+                else:
+                    st.error("❌ Invalid credentials")
 
     with tab2:
         new_user = st.text_input("New Username", key="reg_user")
@@ -93,12 +95,10 @@ if not st.session_state.user:
             if not new_user or not new_pass:
                 st.warning("⚠️ Fill all fields")
             else:
-                with st.spinner("Registering..."):
-                    if register(new_user, new_pass):
-                        st.success("✅ Registered")
-                    else:
-                        st.error("❌ Username exists")
-
+                if register(new_user, new_pass):
+                    st.success("✅ Registered")
+                else:
+                    st.error("❌ Username exists")
 
 # 🤖 MAIN APP
 else:
@@ -129,17 +129,18 @@ else:
     st.title("🤖 Smart Academic Assistant")
 
     query = st.text_input("Ask your question...", key="query_input")
-    chat_container = st.container()
 
-    # ✅ FIX: safer button handling
+    # 🚀 FIXED BUTTON LOGIC
     if st.button("Ask"):
-        if not query.strip():
+        if not st.session_state.query_input.strip():
             st.warning("⚠️ Please enter a question")
         else:
-            st.session_state.messages.append({"role": "user", "content": query})
+            question = st.session_state.query_input
+
+            st.session_state.messages.append({"role": "user", "content": question})
 
             try:
-                res = requests.post(API, json={"question": query}, timeout=60)
+                res = requests.post(API, json={"question": question}, timeout=60)
 
                 if res.status_code == 200:
                     answer = res.json().get("answer", "⚠️ No response")
@@ -150,24 +151,16 @@ else:
                 answer = f"⚠️ {e}"
 
             st.session_state.messages.append({"role": "assistant", "content": answer})
-            save_chat(st.session_state.user, query, answer)
+            save_chat(st.session_state.user, question, answer)
 
-            # Clear input after ask
+            # ✅ SAFE CLEAR (NO ERROR)
             st.session_state.query_input = ""
 
-            st.session_state.scroll = True
             st.rerun()
 
-    with chat_container:
-        for msg in st.session_state.messages:
-            if msg["role"] == "user":
-                st.markdown(f"<div class='user-box'>🧑 {msg['content']}</div>", unsafe_allow_html=True)
-            else:
-                st.markdown(f"<div class='chat-box'>🤖 {msg['content']}</div>", unsafe_allow_html=True)
-
-    if st.session_state.get("scroll", False):
-        st.markdown(
-            "<script>window.scrollTo(0, document.body.scrollHeight);</script>",
-            unsafe_allow_html=True
-        )
-        st.session_state.scroll = False
+    # 💬 CHAT DISPLAY
+    for msg in st.session_state.messages:
+        if msg["role"] == "user":
+            st.markdown(f"<div class='user-box'>🧑 {msg['content']}</div>", unsafe_allow_html=True)
+        else:
+            st.markdown(f"<div class='chat-box'>🤖 {msg['content']}</div>", unsafe_allow_html=True)
