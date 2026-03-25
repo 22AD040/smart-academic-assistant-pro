@@ -18,7 +18,7 @@ def home():
 def ask(query: Query):
     question = query.question
 
-    # ✅ SIMPLE AI RESPONSE (NO PDF, NO FAISS)
+
     answer = get_answer(question)
 
     return {

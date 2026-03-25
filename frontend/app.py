@@ -13,7 +13,7 @@ API = "https://smart-academic-assistant-pro.onrender.com/ask"
 
 st.set_page_config(page_title="Smart AI Assistant", layout="wide")
 
-# 🎨 UI Styling
+
 st.markdown("""
 <style>
 body { background-color: #0e1117; }
@@ -55,14 +55,14 @@ h1, h2, h3, h4 { color: white; }
 </style>
 """, unsafe_allow_html=True)
 
-# ✅ SESSION STATE INIT
+
 if "user" not in st.session_state:
     st.session_state.user = None
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 🔐 LOGIN PAGE
+
 if not st.session_state.user:
 
     st.title("🎓 Smart Academic Assistant")
@@ -97,7 +97,7 @@ if not st.session_state.user:
                 else:
                     st.error("❌ Username exists")
 
-# 🤖 MAIN APP
+
 else:
 
     st.sidebar.title("👤 User Panel")
@@ -112,7 +112,7 @@ else:
         st.session_state.messages = []
         st.rerun()
 
-    # 💬 Chat History
+
     st.sidebar.markdown("## 💬 Chat History")
     history = get_chat(st.session_state.user)
 
@@ -149,7 +149,7 @@ else:
 
             st.rerun()
 
-    # 💬 CHAT DISPLAY
+
     for msg in st.session_state.messages:
         if msg["role"] == "user":
             st.markdown(f"<div class='user-box'>🧑 {msg['content']}</div>", unsafe_allow_html=True)

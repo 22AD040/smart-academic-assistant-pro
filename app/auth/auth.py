@@ -5,17 +5,17 @@ DATA_DIR = "data"
 USER_FILE = os.path.join(DATA_DIR, "users.json")
 CHAT_FILE = os.path.join(DATA_DIR, "chats.json")
 
-# Ensure data folder exists
+
 os.makedirs(DATA_DIR, exist_ok=True)
 
-# Initialize files if not present
+
 for file in [USER_FILE, CHAT_FILE]:
     if not os.path.exists(file):
         with open(file, "w", encoding="utf-8") as f:
             json.dump({}, f)
 
 
-# 🔄 Load JSON safely
+
 def load(file):
     try:
         with open(file, "r", encoding="utf-8") as f:
@@ -24,13 +24,13 @@ def load(file):
         return {}
 
 
-# 💾 Save JSON safely
+
 def save(file, data):
     with open(file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
 
 
-# 🔐 Register user
+
 def register(username, password):
     users = load(USER_FILE)
 
@@ -38,14 +38,14 @@ def register(username, password):
         return False
 
     users[username] = {
-        "password": password  # (simple for now)
+        "password": password  
     }
 
     save(USER_FILE, users)
     return True
 
 
-# 🔓 Login user
+
 def login(username, password):
     users = load(USER_FILE)
 
@@ -55,7 +55,7 @@ def login(username, password):
     )
 
 
-# 💬 Save chat
+
 def save_chat(user, question, answer):
     chats = load(CHAT_FILE)
 
@@ -70,7 +70,7 @@ def save_chat(user, question, answer):
     save(CHAT_FILE, chats)
 
 
-# 📜 Get chat history
+
 def get_chat(user):
     chats = load(CHAT_FILE)
     return chats.get(user, [])
