@@ -29,6 +29,28 @@
 
 ---
 
+## 📚 API Documentation (FastAPI)
+
+You can explore and test the backend API using FastAPI's interactive docs:
+
+👉 **Swagger UI :**  
+https://smart-academic-assistant-pro.onrender.com/docs
+
+
+### 🔍 How to Use
+
+1. Open the Swagger UI link  
+2. Click on `/ask` endpoint  
+3. Click **"Try it out"**  
+4. Enter request body:
+
+```json
+{
+  "question": "What is Artificial Intelligence?"
+}
+
+---
+
 ## 🧠 Overview
 
 **Smart Academic Assistant Pro** is a full-stack AI application that helps students:
